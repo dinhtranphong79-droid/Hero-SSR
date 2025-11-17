@@ -1,261 +1,245 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Điểm tướng SSR</title>
-  <style>
-    :root {
-      --bg: #0f1724;
-      --card: #0b1220;
-      --muted: #94a3b8;
-      --accent: #60a5fa;
-      --glass: rgba(255, 255, 255, 0.03);
-    }
-    html, body { height: 100%; margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    body { background: linear-gradient(180deg, #071024 0%, #071728 60%); color: #e6eef8; padding: 18px; box-sizing: border-box; }
-    .app { max-width: 1100px; margin: 0 auto; }
-    header { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    h1 { font-size: 20px; margin: 0; }
-    .controls { display: flex; gap: 8px; align-items: center; }
-    .tabs { display: flex; gap: 6px; }
-    .tab { background: var(--glass); padding: 8px 12px; border-radius: 10px; cursor: pointer; color: var(--muted); }
-    .tab.active { background: linear-gradient(90deg, var(--accent), #7dd3fc); color: #012; font-weight: 600; }
-    .grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; }
-    .panel { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding: 14px; border-radius: 12px; box-shadow: 0 6px 24px rgba(2,6,23,0.6); }
-    .system-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .system-title { font-weight: 600; }
-    .hero-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow: auto; padding-right: 6px; }
-    .hero { display: grid; grid-template-columns: 1fr 110px 90px 110px 80px; gap: 8px; align-items: center; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.01); }
-    .hero small { color: var(--muted); }
-    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    input[type="number"], select, input[type="text"] { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); background: transparent; color: inherit; }
-    .btn { padding: 8px 10px; border-radius: 8px; border: 0; cursor: pointer; background: var(--accent); color: #012; font-weight: 600; }
-    .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: var(--muted); }
-    .summary { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-    .row { display: flex; justify-content: space-between; align-items: center; }
-    .big { font-size: 18px; font-weight: 700; }
-    .small-muted { color: var(--muted); font-size: 13px; }
-    footer { margin-top: 16px; color: var(--muted); font-size: 13px; text-align: center; }
-    .actions { display: flex; flex-direction: column; gap: 8px; }
-    .flex { display: flex; gap: 8px; }
-    .history { max-height: 220px; overflow: auto; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.01); }
-    pre { white-space: pre-wrap; word-break: break-word; color: var(--muted); font-size: 13px; }
-    .hero-ops { display: flex; gap: 6px; }
-    @media (max-width: 980px) {
-      .grid { grid-template-columns: 1fr; }
-      .hero { grid-template-columns: 1fr 90px 80px 80px 70px; }
-      .controls { flex-wrap: wrap; }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Điểm tướng SSR & Exp</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --card:#f0f0f0;
+  --muted:#555555;
+  --accent:#60a5fa;
+}
+body {margin:0;padding:18px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:var(--bg);color:#012;}
+.app {max-width:1100px;margin:0 auto;}
+header {display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px;}
+h1 {font-size:20px;margin:0;}
+.controls {display:flex;gap:8px;align-items:center;}
+.tabs {display:flex;gap:6px;flex-wrap:wrap;}
+.tab {padding:8px 12px;border-radius:10px;cursor:pointer;background:#e6e6e6;color:var(--muted);}
+.tab.active {background:var(--accent);color:#fff;font-weight:600;}
+.grid {display:grid;grid-template-columns:1fr 360px;gap:16px;}
+.panel {background:#f8f8f8;padding:14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,0.1);}
+.hero-list {display:flex;flex-direction:column;gap:10px;max-height:480px;overflow:auto;}
+.hero {display:grid;grid-template-columns:1fr 110px 90px 110px 80px;gap:8px;align-items:center;padding:8px;border-radius:8px;background:#fff;}
+.hero small {color:var(--muted);}
+input[type="number"], select {width:100%;padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:inherit;}
+.btn {padding:8px 10px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:#fff;font-weight:600;}
+.btn.ghost {background:transparent;border:1px solid rgba(0,0,0,0.1);color:var(--muted);}
+.summary {display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.row {display:flex;justify-content:space-between;align-items:center;}
+.big {font-size:18px;font-weight:700;}
+footer {margin-top:16px;color:var(--muted);font-size:13px;text-align:center;}
+.hero-ops {display:flex;gap:6px;}
+@media (max-width:980px){.grid{grid-template-columns:1fr;}.hero{grid-template-columns:1fr 90px 80px 80px 70px;}}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <h1>Điểm tướng SSR</h1>
-        <div class="small-muted">1 thẻ = <strong>14,000 điểm</strong>.</div>
-      </div>
-      <div class="controls">
-        <div class="tabs" id="tabs"></div>
-        <button class="btn ghost" id="btnExport">Export JSON</button>
-        <button class="btn ghost" id="btnImport">Import JSON</button>
-        <input type="file" id="fileInput" style="display: none" />
-      </div>
-    </header>
-    <main class="grid">
-      <section class="panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div>
-            <strong id="systemTitle">Lửa</strong>
-            <div class="small-muted">Chọn tướng, thiết lập sao &amp; bậc, nhập thẻ — bấm “Tính” để xem kết quả.</div>
-          </div>
-          <div class="flex">
-            <button class="btn" id="btnAddHero">+ Thêm tướng</button>
-            <button class="btn ghost" id="btnCalcAll">Tính toàn bộ</button>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:12px;align-items:end">
-          <div style="flex:1"><input id="filterHero" placeholder="Tìm tướng theo tên" /></div>
-          <div style="width:170px"></div>
-          <div style="width:130px"><select id="viewMode"></select></div>
-        </div>
-        <div class="hero-list" id="heroList" aria-live="polite"></div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <button class="btn" id="btnSave">Lưu thay đổi</button>
-          <div style="flex:1"></div>
-        </div>
-      </section>
-      <aside class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong>Tổng kết</strong>
-          <div class="small-muted">Tổng điểm theo hệ và toàn bộ</div>
-        </div>
-        <div class="summary" id="summary"></div>
-        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Lịch sử (history)</strong>
-          <div class="small-muted">Những lần bấm “Tính toàn bộ”</div>
-        </div>
-        <div class="history" id="historyBox"></div>
-        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <button class="btn" id="btnClearHistory">Xoá lịch sử</button>
-          <button class="btn ghost" id="btnResetAll">Reset toàn bộ</button>
-        </div>
-      </aside>
-    </main>
-    <footer>Export/import để chia sẻ cấu hình tướng.</footer>
+<div class="app">
+<header>
+  <div>
+    <h1>Điểm tướng SSR & Exp</h1>
   </div>
+  <div class="controls">
+    <div class="tabs" id="tabs"></div>
+  </div>
+</header>
+<main class="grid">
+<section class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div><strong id="systemTitle">Lửa</strong></div>
+    <div class="flex">
+      <button class="btn" id="btnCalcAll">Tính toàn bộ</button>
+    </div>
+  </div>
+  <div style="margin-bottom:12px"><input id="filterHero" placeholder="Tìm tướng theo tên" /></div>
+  <div class="hero-list" id="heroList"></div>
+</section>
+<aside class="panel">
+  <div><strong>Tổng kết</strong></div>
+  <div class="summary" id="summary"></div>
+</aside>
+</main>
+<footer>SSR & Exp, bậc 0★, tính thẻ còn thiếu để 5★. Tự lưu tự động.</footer>
+</div>
+<script>
+const COST={
+0:{1:1},
+1:{1:20,2:20},
+2:{1:30,2:40,3:50},
+3:{1:60,2:70,3:80,4:80},
+4:{1:100,2:110,3:120,4:130,5:140},
+5:{1:170,2:180,3:190,4:200,5:210}
+};
+const SYSTEMS=["Lửa","Cung","Độc","Băng"];
+const EXP_CATS=["B+","B","SR"];
+const $=id=>document.getElementById(id);
 
-  <script>
-    const COST = {
-      0:{1:1}, 1:{1:20,2:20}, 2:{1:30,2:40,3:50}, 3:{1:60,2:70,3:80,4:80},
-      4:{1:100,2:110,3:120,4:130,5:140}, 5:{1:170,2:180,3:190,4:200,5:210}
-    };
-    const SYSTEMS = ["Lửa","Cung","Độc","Băng"];
-    const LS_KEY = "hero_upgrader_v1";
-    const LS_HISTORY = "hero_upgrader_history_v1";
-    const $ = id=>document.getElementById(id);
+let state={heroes:[],activeTab:SYSTEMS[0]};
 
-    let state = {heroes:[], activeSystem:SYSTEMS[0], history:[]};
+const heroesData = {
+  Lửa:["Dolvar","Paul","Alex","Allen","Anko","Apollo","Blaise","Brie","Catrina","Christie","Cosette","Dain","Darcy","Daria","Dean","Edmund"],
+  Cung:["Aidan","Alden","Ariza","Authur","Bella","Colin","Doris","Dylan","Eleanora","Fatima","Gabriel","Green","Jennifer","Johannes","Kadir","Kailin","Layla","Livia","Maya","Meg","Mira","Montag","O'Neil","Padme","Pan","Ptolemy","Richard","Ryan","Sahar","Sebastian","Seraphia","Solder","Torvi","Trist"],
+  Độc:["Allison","Angelina","Arwin","Benjamin","Blackwell","Boudica","Catherine","Chiyoko","Claudia","Daisy","Elia","Gruen","Issac","Lilith","Lomax","Luvia","Maxwell","Meniere","Morgana","Mycelia","Naga","Pythia","Rila","Rogers","Rosamond","Suad","Tumnus","Viper","Viola","Webster","Wendy"],
+  Băng:["Christine","Clarence","Enzo","Eslaine","Filius","Hadi","Hana","Hathes","Havik","Jessica","Judy","Keith","Lilani","Loka","Maud","Nathaniel","Nicole","Nina","Nivea","Olaf","Parr","Paula","Pedra","Ralph","Rebecca","Rudolph","Selene","Trishy","Vera","Ao Deng","Ao Yue"]
+};
+const expData={"B+":["Daniel"],"B":["Anton","Peter","Etley"],"SR":["Alucard","Samar","Harold","Kris","Merlin","Ophelia","Arwyn"]};
 
-    const heroesData = {
-      lua:["Dolvar","Paul","Alex","Allen","Anko","Apollo","Blaise","Brie","Catrina","Christie","Cosette","Dain","Darcy","Daria","Dean","Edmund"],
-      cung:["Aidan","Alden","Ariza","Authur","Bella","Colin","Doris","Dylan","Eleanora","Fatima","Gabriel","Green","Jennifer","Johannes","Kadir","Kailin","Layla","Livia","Maya","Meg","Mira","Montag","O'Neil","Padme","Pan","Ptolemy","Richard","Ryan","Sahar","Sebastian","Seraphia","Solder","Torvi","Trist"],
-      bang:["Christine","Clarence","Enzo","Eslaine","Filius","Hadi","Hana","Hathes","Havik","Jessica","Judy","Keith","Lilani","Loka","Maud","Nathaniel","Nicole","Nina","Nivea","Olaf","Parr","Paula","Pedra","Ralph","Rebecca","Rudolph","Selene","Trishy","Vera","Ao Deng","Ao Yue"],
-      doc:["Allison","Angelina","Arwin","Benjamin","Blackwell","Boudica","Catherine","Chiyoko","Claudia","Daisy","Elia","Gruen","Issac","Lilith","Lomax","Luvia","Maxwell","Meniere","Morgana","Mycelia","Naga","Pythia","Rila","Rogers","Rosamond","Suad","Tumnus","Viper","Viola","Webster","Wendy"]
-    };
+function defaultHeroData(name, system){return {id:"i-"+Math.random().toString(36).substr(2,9),name,system,current_star:0,current_bar:0,cards_owned:0};}
+function maxBarForStar(st){return COST[st]?Math.max(...Object.keys(COST[st])):0;}
+function formatNumber(n){return Number(n).toLocaleString("vi-VN");}
 
-    function idNow(){return"i-"+Math.random().toString(36).substr(2,9);}
-    function maxBarForStar(st){const map=COST[st];return map?Math.max(...Object.keys(map).map(Number)):1;}
-    function formatNumber(n){return Number(n).toLocaleString("vi-VN");}
+function saveState(){localStorage.setItem("heroesState", JSON.stringify(state.heroes));}
+function loadState(){
+  const data = localStorage.getItem("heroesState");
+  if(data) state.heroes = JSON.parse(data);
+}
 
-    function defaultHeroData(name, system){return{ id:idNow(), name, system, current_star:0, current_bar:1, cards_owned:0}; }
+function createHeroElement(h){
+  const box=document.createElement("div"); box.className="hero";
+  const nameCol=document.createElement("div");
+  nameCol.innerHTML=`<div style="font-weight:600">${h.name}</div><small>${h.system}</small>`;
+  const starCol=document.createElement("div");
+  const starSel=document.createElement("select");
+  starSel.innerHTML=Array.from({length:6}).map((_,i)=>`<option value="${i}" ${i===h.current_star?"selected":""}>${i}★</option>`).join("");
+  starSel.onchange=()=>{
+    h.current_star=parseInt(starSel.value,10);
+    if(h.current_bar>maxBarForStar(h.current_star)) h.current_bar=maxBarForStar(h.current_star);
+    saveState();
+    renderHeroList(); renderSummary();
+  }
+  starCol.appendChild(starSel);
 
-    function init(){
-      loadState();
-      if(!state.heroes || state.heroes.length===0) {
-        const map={"Lửa":"lua","Cung":"cung","Độc":"doc","Băng":"bang"};
-        SYSTEMS.forEach(sys=>{const key=map[sys];heroesData[key].forEach(n=>state.heroes.push(defaultHeroData(n,sys)));});
-      }
-      renderTabs(); bindControls(); renderHeroList(); renderSummary(); renderHistory();
-    }
+  const barCol=document.createElement("div");
+  const barSel=document.createElement("select");
+  const maxBar=maxBarForStar(h.current_star);
+  barSel.innerHTML=Array.from({length:maxBar+1}).map((_,i)=>`<option value="${i}" ${i===h.current_bar?"selected":""}>Bậc ${i}</option>`).join("");
+  barSel.onchange=()=>{
+    h.current_bar=parseInt(barSel.value,10);
+    saveState();
+    renderSummary();
+  }
+  barCol.appendChild(barSel);
 
-    function loadState(){
-      try{
-        const raw=localStorage.getItem(LS_KEY);
-        if(raw){state=JSON.parse(raw); if(!state.heroes)state.heroes=[]; if(!state.activeSystem)state.activeSystem=SYSTEMS[0]; if(!state.history)state.history=[];}
-      }catch(e){console.error("Load state failed",e); state={heroes:[],activeSystem:SYSTEMS[0],history:[]};}
-    }
+  const cardCol=document.createElement("div");
+  const cardsInput=document.createElement("input"); cardsInput.type="number"; cardsInput.min=0; cardsInput.value=h.cards_owned||0;
+  cardsInput.onchange=()=>{
+    h.cards_owned=Math.max(0,Math.floor(Number(cardsInput.value)||0));
+    saveState();
+    renderSummary();
+  }
+  cardCol.appendChild(cardsInput);
 
-    function saveState(){localStorage.setItem(LS_KEY,JSON.stringify(state)); showToast("Đã lưu cấu hình");}
+  const opsCol=document.createElement("div"); opsCol.className="hero-ops";
+  const calcBtn=document.createElement("button"); calcBtn.className="btn ghost"; calcBtn.textContent="Tính";
+  calcBtn.onclick=()=>{showModalResult(h);}
+  opsCol.appendChild(calcBtn);
 
-    function renderTabs(){
-      const tabs=$("tabs"); tabs.innerHTML="";
-      SYSTEMS.forEach(s=>{
-        const btn=document.createElement("button");
-        btn.className="tab"+(state.activeSystem===s?" active":"");
-        btn.textContent=s;
-        btn.onclick=()=>{state.activeSystem=s; $("systemTitle").textContent=s; renderTabs(); renderHeroList();};
-        tabs.appendChild(btn);
-      });
-      const histBtn=document.createElement("button");
-      histBtn.className="tab"+(state.activeSystem==="__ALL__"?" active":""); histBtn.textContent="Tất cả";
-      histBtn.onclick=()=>{state.activeSystem="__ALL__"; $("systemTitle").textContent="Tất cả hệ"; renderTabs(); renderHeroList();};
-      tabs.appendChild(histBtn);
-      $("systemTitle").textContent=state.activeSystem==="__ALL__"?"Tất cả hệ":state.activeSystem;
-    }
+  box.appendChild(nameCol); box.appendChild(starCol); box.appendChild(barCol); box.appendChild(cardCol); box.appendChild(opsCol);
+  return box;
+}
 
-    function renderHeroList(){
-      const list=$("heroList"); list.innerHTML="";
-      const filter=($("filterHero").value||"").trim().toLowerCase();
-      const filtered=state.heroes.filter(h=>{if(state.activeSystem!=="__ALL__"&&h.system!==state.activeSystem)return false;if(filter&&!h.name.toLowerCase().includes(filter))return false;return true;});
-      if(filtered.length===0){list.innerHTML=`<div class="small-muted">Không có tướng nào (thêm tướng mới để bắt đầu).</div>`; return;}
-      filtered.forEach(h=>{
-        const box=document.createElement("div"); box.className="hero";
-        const nameCol=document.createElement("div"); nameCol.innerHTML=`<div style="font-weight:600">${h.name}</div><small class="small-muted">${h.system}</small>`;
-        const starCol=document.createElement("div"); const starSel=document.createElement("select");
-        starSel.innerHTML=Array.from({length:6}).map((_,i)=>`<option value="${i}" ${i===h.current_star?"selected":""}>${i}★</option>`).join("");
-        starSel.onchange=()=>{h.current_star=parseInt(starSel.value,10); if(h.current_bar>maxBarForStar(h.current_star)) h.current_bar=maxBarForStar(h.current_star); renderHeroList();};
-        starCol.appendChild(starSel);
+function calculateUpgrade(hero){
+  let star=hero.current_star||0, bar=hero.current_bar||0, cards=hero.cards_owned||0, cardsConsumed=0;
+  const costFor=(st,barIdx)=>(COST[st]&&COST[st][barIdx]?Number(COST[st][barIdx]):null);
+  while(cards>0){
+    const maxBar=maxBarForStar(star);
+    if(star>=5&&bar>=maxBar) break;
+    let nextBar=bar+1;
+    if(bar>=maxBar){if(star>=5) break; star+=1; bar=0; continue;}
+    const needed=costFor(star,nextBar);
+    if(needed===null){if(bar>=maxBar){if(star>=5) break; star+=1; bar=0; continue;} else break;}
+    if(cards>=needed){cards-=needed; cardsConsumed+=needed; bar=nextBar; if(bar>=maxBar){if(star<5){star+=1; bar=0;} else{bar=maxBar; break;}}}else break;
+  }
+  const missingCards=()=>{
+    let ms=0, s=star, b=bar;
+    while(s<5){const maxBar=maxBarForStar(s); ms+=COST[s][b+1]||COST[s][1]; b++; if(b>maxBar){s++; b=0;}}
+    return ms;
+  };
+  return {final_star:star,final_bar:bar,cards_left:cards,cards_consumed:cardsConsumed,missing_to_5:missingCards()};
+}
 
-        const barCol=document.createElement("div"); const barSel=document.createElement("select");
-        const maxBar=maxBarForStar(h.current_star);
-        barSel.innerHTML=Array.from({length:maxBar}).map((_,i)=>`<option value="${i+1}" ${i+1===h.current_bar?"selected":""}>Bậc ${i+1}</option>`).join("");
-        barSel.onchange=()=>{h.current_bar=parseInt(barSel.value,10);};
-        barCol.appendChild(barSel);
+function showModalResult(hero){
+  let points=0,res;
+  if(hero.system!=="Exp"){
+    res=calculateUpgrade(hero);
+    points=res.cards_consumed*14000;
+  } else {
+    res={cards_left:0,cards_consumed:hero.cards_owned,missing_to_5:0};
+    if(expData["B+"].includes(hero.name)) points=hero.cards_owned*100;
+    else if(expData["B"].includes(hero.name)) points=hero.cards_owned*700;
+    else if(expData["SR"].includes(hero.name)) points=hero.cards_owned*3500;
+  }
+  alert(`Tướng: ${hero.name} (${hero.system})
+Sao/Bậc: ${hero.current_star}★ Bậc ${hero.current_bar}
+Thẻ sử dụng: ${res.cards_consumed}
+Thẻ còn lại: ${res.cards_left}
+Điểm: ${formatNumber(points)}
+Thiếu để 5★: ${res.missing_to_5} thẻ`);
+}
 
-        const cardCol=document.createElement("div"); const cardsInput=document.createElement("input");
-        cardsInput.type="number"; cardsInput.min=0; cardsInput.value=h.cards_owned||0; cardsInput.onchange=()=>{h.cards_owned=Math.max(0,Math.floor(Number(cardsInput.value)||0));};
-        cardCol.appendChild(cardsInput);
+function renderHeroList(){
+  const list=$("heroList"); list.innerHTML="";
+  const filter=($("filterHero").value||"").trim().toLowerCase();
+  if(SYSTEMS.includes(state.activeTab)){
+    heroesData[state.activeTab].forEach(n=>{
+      const h=state.heroes.find(x=>x.name===n); if(!h||(filter&&!n.toLowerCase().includes(filter))) return;
+      list.appendChild(createHeroElement(h));
+    });
+  } else if(EXP_CATS.includes(state.activeTab)){
+    expData[state.activeTab].forEach(n=>{
+      const h=state.heroes.find(x=>x.name===n); if(!h||(filter&&!n.toLowerCase().includes(filter))) return;
+      list.appendChild(createHeroElement(h));
+    });
+  }
+}
 
-        const opsCol=document.createElement("div"); opsCol.className="hero-ops";
-        const calcBtn=document.createElement("button"); calcBtn.className="btn ghost"; calcBtn.textContent="Tính";
-        calcBtn.onclick=()=>{const res=calculateUpgrade(h,h.cards_owned); showModalResult(h,res);};
-        const delBtn=document.createElement("button"); delBtn.className="btn"; delBtn.textContent="X";
-        delBtn.onclick=()=>{if(confirm("Xoá tướng này?")){state.heroes=state.heroes.filter(x=>x.id!==h.id); saveState(); renderHeroList(); renderSummary();}};
-        opsCol.appendChild(calcBtn); opsCol.appendChild(delBtn);
+function renderSummary(){
+  const sumBox=$("summary"); sumBox.innerHTML="";
+  const totals={};
+  SYSTEMS.concat(EXP_CATS).forEach(s=>totals[s]=0);
+  state.heroes.forEach(h=>{
+    let points=0;
+    if(h.system!=="Exp"){points=calculateUpgrade(h).cards_consumed*14000;}
+    else if(expData["B+"].includes(h.name)) points=h.cards_owned*100;
+    else if(expData["B"].includes(h.name)) points=h.cards_owned*700;
+    else if(expData["SR"].includes(h.name)) points=h.cards_owned*3500;
+    totals[h.system==="Exp"?EXP_CATS.find(cat=>expData[cat].includes(h.name)):h.system]+=points;
+  });
+  Object.keys(totals).forEach(s=>{
+    const row=document.createElement("div"); row.className="row";
+    row.innerHTML=`<span>${s}</span><span class="big">${formatNumber(totals[s])}</span>`; sumBox.appendChild(row);
+  });
+  const totalAll=document.createElement("div"); totalAll.className="row";
+  totalAll.innerHTML=`<strong>Tổng</strong><strong>${formatNumber(Object.values(totals).reduce((a,b)=>a+b,0))}</strong>`;
+  sumBox.appendChild(totalAll);
+}
 
-        box.appendChild(nameCol); box.appendChild(starCol); box.appendChild(barCol); box.appendChild(cardCol); box.appendChild(opsCol);
-        list.appendChild(box);
-      });
-    }
+function renderTabs(){
+  const tabs=$("tabs"); tabs.innerHTML="";
+  SYSTEMS.concat(EXP_CATS).forEach(tab=>{
+    const btn=document.createElement("button"); btn.className="tab"+(state.activeTab===tab?" active":""); btn.textContent=tab;
+    btn.onclick=()=>{state.activeTab=tab; $("systemTitle").textContent=tab; renderTabs(); renderHeroList(); renderSummary();}
+    tabs.appendChild(btn);
+  });
+}
 
-    function calculateUpgrade(hero, cardsOwned){
-      let star=Number(hero.current_star)||0, bar=Number(hero.current_bar)||1, cards=Number(cardsOwned)||0, cardsConsumed=0;
-      const costFor=(st,barIdx)=>(COST[st]&&COST[st][barIdx]?Number(COST[st][barIdx]):null);
-      if(bar<1)bar=1;
-      while(cards>0){
-        const maxBar=maxBarForStar(star);
-        if(star===5&&bar>=maxBar) break;
-        let nextBar=bar+1;
-        if(bar>=maxBar){if(star>=5)break; star+=1; bar=0; continue;}
-        const needed=costFor(star,nextBar);
-        if(needed===null){if(bar>=maxBar){if(star>=5)break; star+=1; bar=0; continue;}else break;}
-        if(cards>=needed){cards-=needed; cardsConsumed+=needed; bar=nextBar; if(bar>=maxBar){if(star<5){star+=1; bar=0;} else{bar=maxBar; break;}}}else break;
-      }
-      if(bar===0) bar=1;
-      const cardPoint=14000;
-      return {final_star:star, final_bar:bar, cards_left:cards, cards_consumed:cardsConsumed, points_gained:cardsConsumed*cardPoint};
-    }
+function init(){
+  loadState(); // load dữ liệu tự lưu
+  if(!state.heroes || state.heroes.length===0){
+    Object.keys(heroesData).forEach(sys=>heroesData[sys].forEach(n=>state.heroes.push(defaultHeroData(n,sys))));
+    Object.keys(expData).forEach(cat=>expData[cat].forEach(n=>state.heroes.push(defaultHeroData(n,"Exp"))));
+  }
+  renderTabs(); renderHeroList(); renderSummary();
+  $("filterHero").addEventListener("input",()=>renderHeroList());
+  $("btnCalcAll").onclick=()=>{
+    renderSummary();
+    saveState();
+  };
+}
 
-    function showModalResult(hero,res){
-      alert(`Tướng: ${hero.name} (${hero.system})
-Sao ban đầu: ${hero.current_star}★, Bậc ${hero.current_bar}
-Thẻ sử dụng: ${res.cards_consumed} thẻ
-Sao/bậc cuối: ${res.final_star}★ Bậc ${res.final_bar}
-Điểm thu được: ${formatNumber(res.points_gained)} điểm
-Thẻ còn lại: ${res.cards_left}`);
-    }
-
-    function renderSummary(){
-      const sumBox=$("summary"); sumBox.innerHTML="";
-      const pointsBySys={}; let totalPoints=0;
-      state.heroes.forEach(h=>{const res=calculateUpgrade(h,h.cards_owned); pointsBySys[h.system]=(pointsBySys[h.system]||0)+res.points_gained; totalPoints+=res.points_gained;});
-      SYSTEMS.forEach(s=>{
-        const row=document.createElement("div"); row.className="row"; row.innerHTML=`<span>${s}</span><span class="big">${formatNumber(pointsBySys[s]||0)}</span>`; sumBox.appendChild(row);
-      });
-      const rowTotal=document.createElement("div"); rowTotal.className="row"; rowTotal.innerHTML=`<strong>Tổng</strong><strong>${formatNumber(totalPoints)}</strong>`; sumBox.appendChild(rowTotal);
-    }
-
-    function renderHistory(){
-      const box=$("historyBox"); box.innerHTML=""; state.history.slice(-10).reverse().forEach(h=>{const pre=document.createElement("pre"); pre.textContent=h; box.appendChild(pre);});
-    }
-
-    function bindControls(){
-      $("filterHero").addEventListener("input",()=>renderHeroList());
-      $("btnAddHero").onclick=()=>{const name=prompt("Nhập tên tướng mới:"); if(name){const sys=state.activeSystem==="__ALL__"?SYSTEMS[0]:state.activeSystem; state.heroes.push(defaultHeroData(name,sys)); saveState(); renderHeroList(); renderSummary();}};
-      $("btnSave").onclick=()=>{saveState(); renderSummary();};
-      $("btnCalcAll").onclick=()=>{const snapshot=state.heroes.map(h=>`${h.name} ${h.current_star}★B${h.current_bar}: ${calculateUpgrade(h,h.cards_owned).points_gained} điểm`).join("\n"); state.history.push(snapshot); if(state.history.length>50) state.history.shift(); saveState(); renderHistory(); renderSummary();};
-      $("btnClearHistory").onclick=()=>{if(confirm("Xoá toàn bộ lịch sử?")){state.history=[]; saveState(); renderHistory();}};
-      $("btnResetAll").onclick=()=>{if(confirm("Reset toàn bộ tướng?")){state.heroes.forEach(h=>{h.current_star=0;h.current_bar=1;h.cards_owned=0}); saveState(); renderHeroList(); renderSummary();}};
-      $("btnExport").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="hero_state.json"; a.click(); URL.revokeObjectURL(url);};
-      $("btnImport").onclick=()=>{$("fileInput").click();};
-      $("fileInput").onchange=e=>{const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=()=>{try{const imported=JSON.parse(reader.result); if(imported.heroes){state.heroes=imported.heroes; saveState(); renderHeroList(); renderSummary();} }catch(err){alert("Import lỗi!")}}; reader.readAsText(file);};
-    }
-
-    init();
-  </script>
+init();
+</script>
 </body>
 </html>
