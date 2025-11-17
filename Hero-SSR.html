@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Điểm tướng SSR</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --glass: rgba(255, 255, 255, 0.03);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    body {
+      background: linear-gradient(180deg, #071024 0%, #071728 60%);
+      color: #e6eef8;
+      padding: 18px;
+      box-sizing: border-box;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab {
+      background: var(--glass);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .tab.active {
+      background: linear-gradient(90deg, var(--accent), #7dd3fc);
+      color: #012;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(2,6,23,0.6);
+    }
+
+    .system-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .system-title {
+      font-weight: 600;
+    }
+
+    .hero-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 110px 90px 110px 80px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .hero small {
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input[type="number"], select, input[type="text"] {
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.04);
+      background: transparent;
+      color: inherit;
+    }
+
+    .btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      background: var(--accent);
+      color: #012;
+      font-weight: 600;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+
+    .summary {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .big {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .small-muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .flex {
+      display: flex;
+      gap: 8px;
+    }
+
+    .history {
+      max-height: 220px;
+      overflow: auto;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.01);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero-ops {
+      display: flex;
+      gap: 6px;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        grid-template-columns: 1fr 90px 80px 80px 70px;
+      }
+      .controls {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Điểm tướng SSR</h1>
+        <div class="small-muted">1 thẻ = <strong>14,000 điểm</strong>.</div>
+      </div>
+      <div class="controls">
+        <div class="tabs" id="tabs"></div>
+        <button class="btn ghost" id="btnExport">Export JSON</button>
+        <button class="btn ghost" id="btnImport">Import JSON</button>
+        <input type="file" id="fileInput" style="display: none" />
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <strong id="systemTitle">Lửa</strong>
+            <div class="small-muted">Chọn tướng, thiết lập sao &amp; bậc, nhập thẻ — bấm “Tính” để xem kết quả.</div>
+          </div>
+          <div class="flex">
+            <button class="btn" id="btnAddHero">+ Thêm tướng</button>
+            <button class="btn ghost" id="btnCalcAll">Tính toàn bộ</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:12px;align-items:end">
+          <div style="flex:1">
+            <input id="filterHero" placeholder="Tìm tướng theo tên" />
+          </div>
+          <div style="width:170px"></div>
+          <div style="width:130px">
+            <select id="viewMode"></select>
+          </div>
+        </div>
+
+        <div class="hero-list" id="heroList" aria-live="polite"></div>
+
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="btnSave">Lưu thay đổi</button>
+          <div style="flex:1"></div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Tổng kết</strong>
+          <div class="small-muted">Tổng điểm theo hệ và toàn bộ</div>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
+
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Lịch sử (history)</strong>
+          <div class="small-muted">Những lần bấm “Tính toàn bộ”</div>
+        </div>
+        <div class="history" id="historyBox"></div>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn" id="btnClearHistory">Xoá lịch sử</button>
+          <button class="btn ghost" id="btnResetAll">Reset toàn bộ</button>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Export/import để chia sẻ cấu hình tướng.</footer>
+  </div>
+
+
+  <script>
+    // Cấu hình chi phí (cost)
+    const COST = {
+      0: { 1: 1 },
+      1: { 1: 20, 2: 20 },
+      2: { 1: 30, 2: 40, 3: 50 },
+      3: { 1: 60, 2: 70, 3: 80, 4: 80 },
+      4: { 1: 100, 2: 110, 3: 120, 4: 130, 5: 140 },
+      5: { 1: 170, 2: 180, 3: 190, 4: 200, 5: 210 }
+    };
+
+    const SYSTEMS = ["Lửa", "Cung", "Độc", "Băng"];
+    const LS_KEY = "hero_upgrader_v1";
+    const LS_HISTORY = "hero_upgrader_history_v1";
+    const $ = (id) => document.getElementById(id);
+
+    let state = {
+      heroes: [],
+      activeSystem: SYSTEMS[0],
+      history: []
+    };
+
+    function init() {
+      loadState();
+      renderTabs();
+      bindControls();
+      renderHeroList();
+      renderSummary();
+      renderHistory();
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) {
+          state = JSON.parse(raw);
+          if (!state.heroes) state.heroes = [];
+          if (!state.activeSystem) state.activeSystem = SYSTEMS[0];
+          if (!state.history) state.history = [];
+        } else {
+          state.heroes = [];
+          state.history = [];
+          state.activeSystem = SYSTEMS[0];
+        }
+      } catch (e) {
+        state.heroes = [];
+        state.history = [];
+        state.activeSystem = SYSTEMS[0];
+        console.error("Load state failed", e);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+      showToast("Đã lưu cấu hình");
+    }
+
+    function renderTabs() {
+      const tabs = $("tabs");
+      tabs.innerHTML = "";
+      SYSTEMS.forEach((s) => {
+        const btn = document.createElement("button");
+        btn.className = "tab" + (state.activeSystem === s ? " active" : "");
+        btn.textContent = s;
+        btn.onclick = () => {
+          state.activeSystem = s;
+          $("systemTitle").textContent = s;
+          renderTabs();
+          renderHeroList();
+        };
+        tabs.appendChild(btn);
+      });
+
+      const histBtn = document.createElement("button");
+      histBtn.className = "tab" + (state.activeSystem === "__ALL__" ? " active" : "");
+      histBtn.textContent = "Tất cả";
+      histBtn.onclick = () => {
+        state.activeSystem = "__ALL__";
+        $("systemTitle").textContent = "Tất cả hệ";
+        renderTabs();
+        renderHeroList();
+      };
+      tabs.appendChild(histBtn);
+
+      $("systemTitle").textContent = state.activeSystem === "__ALL__" ? "Tất cả hệ" : state.activeSystem;
+    }
+
+    function renderHeroList() {
+      const list = $("heroList");
+      list.innerHTML = "";
+      const filter = ($("filterHero").value || "").trim().toLowerCase();
+      const heroes = state.heroes.filter((h) => {
+        if (state.activeSystem !== "__ALL__" && h.system !== state.activeSystem) return false;
+        if (filter && !h.name.toLowerCase().includes(filter)) return false;
+        return true;
+      });
+
+      if (heroes.length === 0) {
+        const p = document.createElement("div");
+        p.className = "small-muted";
+        p.textContent = "Không có tướng nào (thêm tướng mới để bắt đầu).";
+        list.appendChild(p);
+        return;
+      }
+
+      heroes.forEach((h) => {
+        const box = document.createElement("div");
+        box.className = "hero";
+
+        const nameCol = document.createElement("div");
+        nameCol.innerHTML = `<div style="font-weight:600">${h.name}</div><small class="small-muted">${h.system}</small>`;
+
+        const starCol = document.createElement("div");
+        const starSel = document.createElement("select");
+        starSel.innerHTML = Array.from({ length: 6 })
+          .map((_, i) => `<option value="${i}" ${i === h.current_star ? "selected" : ""}>${i}★</option>`)
+          .join("");
+        starSel.onchange = () => {
+          h.current_star = parseInt(starSel.value, 10);
+          const maxBar = maxBarForStar(h.current_star);
+          if (h.current_bar > maxBar) h.current_bar = maxBar;
+          renderHeroList();
+        };
+        starCol.appendChild(starSel);
+
+        const barCol = document.createElement("div");
+        const barSel = document.createElement("select");
+        const maxBar = maxBarForStar(h.current_star);
+        barSel.innerHTML = Array.from({ length: maxBar })
+          .map((_, i) => `<option value="${i + 1}" ${i + 1 === h.current_bar ? "selected" : ""}>Bậc ${i + 1}</option>`)
+          .join("");
+        barSel.onchange = () => {
+          h.current_bar = parseInt(barSel.value, 10);
+        };
+        barCol.appendChild(barSel);
+
+        const cardCol = document.createElement("div");
+        const cardsInput = document.createElement("input");
+        cardsInput.type = "number";
+        cardsInput.min = 0;
+        cardsInput.value = h.cards_owned || 0;
+        cardsInput.onchange = () => {
+          h.cards_owned = Math.max(0, Math.floor(Number(cardsInput.value) || 0));
+        };
+        cardCol.appendChild(cardsInput);
+
+        const opsCol = document.createElement("div");
+        opsCol.style.display = "flex";
+        opsCol.style.justifyContent = "flex-end";
+        opsCol.style.alignItems = "center";
+        opsCol.className = "hero-ops";
+
+        const calcBtn = document.createElement("button");
+        calcBtn.className = "btn ghost";
+        calcBtn.textContent = "Tính";
+        calcBtn.onclick = () => {
+          const res = calculateUpgrade(h, h.cards_owned);
+          showModalResult(h, res);
+        };
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn";
+        delBtn.textContent = "X";
+        delBtn.onclick = () => {
+          if (confirm("Xoá tướng này?")) {
+            state.heroes = state.heroes.filter((x) => x.id !== h.id);
+            saveState();
+            renderHeroList();
+            renderSummary();
+          }
+        };
+
+        opsCol.appendChild(calcBtn);
+        opsCol.appendChild(delBtn);
+
+        box.appendChild(nameCol);
+        box.appendChild(starCol);
+        box.appendChild(barCol);
+        box.appendChild(cardCol);
+        box.appendChild(opsCol);
+
+        list.appendChild(box);
+      });
+    }
+
+    function maxBarForStar(star) {
+      const map = COST[star];
+      if (!map) return 1;
+      return Math.max(...Object.keys(map).map(Number));
+    }
+
+    function calculateUpgrade(hero, cardsOwned) {
+      let star = Number(hero.current_star) || 0;
+      let bar = Number(hero.current_bar) || 1;
+      let cards = Number(cardsOwned) || 0;
+      let cardsConsumed = 0;
+
+      function costFor(st, barIdx) {
+        if (!COST[st] || COST[st][barIdx] === undefined) return null;
+        return Number(COST[st][barIdx]);
+      }
+
+      if (bar < 1) bar = 1;
+
+      while (cards > 0) {
+        const maxBar = maxBarForStar(star);
+        if (star === 5 && bar >= maxBar) {
+          break;
+        }
+
+        let nextBarIdx = bar + 1;
+        if (bar >= maxBar) {
+          if (star >= 5) break;
+          star += 1;
+          bar = 0;
+          continue;
+        }
+
+        const needed = costFor(star, nextBarIdx);
+        if (needed === null || needed === undefined) {
+          if (bar >= maxBar) {
+            if (star >= 5) break;
+            star += 1;
+            bar = 0;
+            continue;
+          } else {
+            break;
+          }
+        }
+
+        if (cards >= needed) {
+          cards -= needed;
+          cardsConsumed += needed;
+          bar = nextBarIdx;
+
+          if (bar >= maxBar) {
+            if (star < 5) {
+              star += 1;
+              bar = 0;
+            } else {
+              bar = maxBar;
+              break;
+            }
+          }
+        } else {
+          break;
+        }
+      }
+
+      if (bar === 0) {
+        bar = 1;
+      }
+
+      const cardPoint = Number($("cardPoint")?.value) || 14000;
+      const pointsGained = cardsConsumed * cardPoint;
+
+      return {
+        final_star: star,
+        final_bar: bar,
+        cards_left: cards,
+        cards_consumed: cardsConsumed,
+        points_gained: pointsGained
+      };
+    }
+
+    function bindControls() {
+      $("btnAddHero").onclick = () => openAddHeroDialog();
+      $("btnSave").onclick = () => { saveState(); renderHeroList(); renderSummary(); };
+      $("btnCalcAll").onclick = () => calcAllAndSummarize();
+      $("filterHero").oninput = () => renderHeroList();
+      $("btnClearHistory").onclick = () => {
+        if (confirm("Xoá toàn bộ lịch sử?")) {
+          state.history = [];
+          localStorage.setItem(LS_HISTORY, JSON.stringify([]));
+          renderHistory();
+        }
+      };
+      $("btnResetAll").onclick = () => {
+        if (confirm("Reset toàn bộ (xóa dữ liệu lưu)?")) {
+          state.heroes = [];
+          state.history = [];
+          saveState();
+          localStorage.removeItem(LS_HISTORY);
+          renderHeroList();
+          renderSummary();
+          renderHistory();
+        }
+      };
+      $("btnExport").onclick = () => exportJSON();
+      $("btnImport").onclick = () => $("fileInput").click();
+      $("fileInput").onchange = (e) => handleFileImport(e);
+      $("viewMode").onchange = () => renderSummary();
+    }
+
+    function openAddHeroDialog() {
+      const name = prompt("Nhập tên tướng (ví dụ: Frost Mage):");
+      if (!name) return;
+
+      const system = prompt("Hệ tướng: Lửa, Cung, Độc, Băng. (Viết đúng chính tả):", state.activeSystem === "__ALL__" ? "Lửa" : state.activeSystem);
+      if (!SYSTEMS.includes(system)) {
+        alert("Hệ không hợp lệ. Hãy nhập 1 trong: " + SYSTEMS.join(", "));
+        return;
+      }
+
+      const star = parseInt(prompt("Sao hiện tại (0..5):", "0"), 10) || 0;
+      const bar = parseInt(prompt("Bậc hiện tại (1..n):", "1"), 10) || 1;
+      const cards = parseInt(prompt("Số thẻ hiện có (số nguyên):", "0"), 10) || 0;
+
+      const hero = {
+        id: idNow(),
+        name: name.trim(),
+        system,
+        current_star: Math.max(0, Math.min(5, star)),
+        current_bar: Math.max(1, bar),
+        cards_owned: Math.max(0, cards),
+      };
+
+      state.heroes.push(hero);
+      saveState();
+      renderHeroList();
+      renderSummary();
+    }
+
+    function calcAllAndSummarize() {
+      const perSystem = {};
+      SYSTEMS.forEach((s) => {
+        perSystem[s] = { cardsConsumed: 0, points: 0, cardsLeft: 0 };
+      });
+
+      let overallPoints = 0;
+      let overallCardsConsumed = 0;
+      let overallCardsLeft = 0;
+
+      state.heroes.forEach((h) => {
+        const res = calculateUpgrade(h, h.cards_owned);
+        perSystem[h.system].cardsConsumed += res.cards_consumed;
+        perSystem[h.system].points += res.points_gained;
+        perSystem[h.system].cardsLeft += res.cards_left;
+        overallPoints += res.points_gained;
+        overallCardsConsumed += res.cards_consumed;
+        overallCardsLeft += res.cards_left;
+      });
+
+      const entry = {
+        ts: new Date().toISOString(),
+        perSystem,
+        overallPoints,
+        overallCardsConsumed,
+        overallCardsLeft
+      };
+
+      state.history.unshift(entry);
+      if (state.history.length > 50) state.history.pop();
+      localStorage.setItem(LS_HISTORY, JSON.stringify(state.history));
+
+      saveState();
+      renderHistory();
+      renderSummary();
+      showToast("Đã tính toàn bộ và lưu vào lịch sử");
+    }
+
+    function renderSummary() {
+      const box = $("summary");
+      box.innerHTML = "";
+      const cardPoint = Number($("cardPoint")?.value) || 14000;
+
+      const systemsSummary = {};
+      SYSTEMS.forEach((s) => {
+        systemsSummary[s] = { cardsConsumed: 0, points: 0, cardsLeft: 0 };
+      });
+
+      state.heroes.forEach((h) => {
+        const res = calculateUpgrade(h, h.cards_owned);
+        systemsSummary[h.system].cardsConsumed += res.cards_consumed;
+        systemsSummary[h.system].points += res.points_gained;
+        systemsSummary[h.system].cardsLeft += res.cards_left;
+      });
+
+      let totalPoints = 0, totalCardsConsumed = 0, totalCardsLeft = 0;
+      SYSTEMS.forEach((s) => {
+        const v = systemsSummary[s];
+        totalPoints += v.points;
+        totalCardsConsumed += v.cardsConsumed;
+        totalCardsLeft += v.cardsLeft;
+
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight:600">${s}</div>
+            <div class="small-muted">${v.cardsConsumed} thẻ tiêu → ${formatNumber(v.points)} điểm</div>
+          </div>
+          <div style="text-align:right">
+            <div class="big">${formatNumber(v.points)}</div>
+            <div class="small-muted">${v.cardsLeft} thẻ dư</div>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      const hr = document.createElement("div");
+      hr.style.height = "1px";
+      hr.style.margin = "8px 0";
+      hr.style.background = "rgba(255,255,255,0.03)";
+      box.appendChild(hr);
+
+      const totalRow = document.createElement("div");
+      totalRow.className = "row";
+      totalRow.innerHTML = `
+        <div>
+          <div style="font-weight:800">Tổng cộng</div>
+          <div class="small-muted">${totalCardsConsumed} thẻ tiêu • ${totalCardsLeft} thẻ dư</div>
+        </div>
+        <div style="text-align:right">
+          <div class="big" style="font-size:20px">${formatNumber(totalPoints)}</div>
+          <div class="small-muted">tổng điểm</div>
+        </div>
+      `;
+      box.appendChild(totalRow);
+    }
+
+    function renderHistory() {
+      const box = $("historyBox");
+      const raw = localStorage.getItem(LS_HISTORY);
+      const hist = raw ? JSON.parse(raw) : state.history || [];
+      box.innerHTML = "";
+
+      if (!hist || hist.length === 0) {
+        box.innerHTML = `<div class="small-muted">Chưa có lịch sử</div>`;
+        return;
+      }
+
+      hist.slice(0, 20).forEach((h) => {
+        const el = document.createElement("div");
+        el.style.marginBottom = "8px";
+        const d = new Date(h.ts);
+        el.innerHTML = `
+          <div style="font-weight:700">${d.toLocaleString()}</div>
+          <div class="small-muted">Tổng điểm: ${formatNumber(h.overallPoints)} • Thẻ tiêu: ${h.overallCardsConsumed} • Thẻ dư: ${h.overallCardsLeft}</div>
+        `;
+        box.appendChild(el);
+      });
+    }
+
+    function exportJSON() {
+      const data = { heroes: state.heroes, history: state.history, ts: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "heroes_upgrader_export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleFileImport(e) {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const json = JSON.parse(ev.target.result);
+          if (json.heroes) {
+            if (confirm("Import file này sẽ ghi đè danh sách tướng hiện tại. Tiếp tục?")) {
+              state.heroes = json.heroes;
+              state.history = json.history || [];
+              saveState();
+              localStorage.setItem(LS_HISTORY, JSON.stringify(state.history));
+              renderTabs();
+              renderHeroList();
+              renderSummary();
+              renderHistory();
+              showToast("Import thành công");
+            }
+          } else {
+            alert("Không nhận dạng file import.");
+          }
+        } catch (err) {
+          alert("File không hợp lệ: " + err.message);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = "";
+    }
+
+    function showModalResult(hero, res) {
+      const lines = [
+        `Tướng: ${hero.name} (${hero.system})`,
+        `Sao ban đầu: ${hero.current_star} ★, Bậc: ${hero.current_bar}`,
+        `Số thẻ sở hữu: ${hero.cards_owned}`,
+        `→ Tiêu: ${res.cards_consumed} thẻ`,
+        `→ Đạt: ${res.final_star} ★, Bậc: ${res.final_bar}`,
+        `Thẻ còn dư: ${res.cards_left}`,
+        `Điểm tăng: ${formatNumber(res.points_gained)}`
+      ];
+      alert(lines.join("\n"));
+    }
+
+    function formatNumber(n) {
+      return Number(n).toLocaleString("vi-VN");
+    }
+
+    function idNow() {
+      return "id-" + Math.random().toString(36).substr(2, 9);
+    }
+
+    function showToast(msg) {
+      console.log("toast:", msg);
+      const el = document.createElement("div");
+      el.textContent = msg;
+      el.style.position = "fixed";
+      el.style.right = "18px";
+      el.style.bottom = "18px";
+      el.style.background = "rgba(10,20,40,0.9)";
+      el.style.padding = "10px 14px";
+      el.style.borderRadius = "8px";
+      el.style.boxShadow = "0 8px 24px rgba(2,6,23,0.6)";
+      document.body.appendChild(el);
+      setTimeout(() => (el.style.opacity = "0"), 2500);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    // Start app
+    init();
+  </script>
+</body>
+</html>
