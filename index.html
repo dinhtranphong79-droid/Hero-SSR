@@ -312,6 +312,76 @@
     const LS_KEY = "hero_upgrader_v1";
     const LS_HISTORY = "hero_upgrader_history_v1";
     const $ = (id) => document.getElementById(id);
+    const heroes = {
+    lua: [
+        "Dolvar", "Paul", "Alex", "Allen", "Anko", "Apollo", "Blaise", "Brie",
+        "Catrina", "Christie", "Cosette", "Dain", "Darcy", "Daria", "Dean",
+        "Edmund", "Erika", "Fiona", "Gisele", "Gro", "Ivy", "Kenshiro", "Kirona",
+        "Kyle", "Lovelace", "Mirai", "Penny", "Seraphin", "Simon", "Sindra",
+        "Theodore", "Tracy", "Vanessa", "Wallis"
+    ],
+    cung: [
+        "Aidan", "Alden", "Ariza", "Authur", "Bella", "Colin", "Doris", "Dylan",
+        "Eleanora", "Fatima", "Gabriel", "Green", "Jennifer", "Johannes",
+        "Kadir", "Kailin", "Layla", "Livia", "Maya", "Meg", "Mira", "Montag",
+        "O'Neil", "Padme", "Pan", "Ptolemy", "Richard", "Ryan", "Sahar",
+        "Sebastian", "Seraphia", "Solder", "Torvi", "Trist"
+    ],
+    bang: [
+        "Christine", "Clarence", "Enzo", "Eslaine", "Filius", "Hadi", "Hana",
+        "Hathes", "Havik", "Jessica", "Judy", "Keith", "Lilani", "Loka", "Maud",
+        "Nathaniel", "Nicole", "Nina", "Nivea", "Olaf", "Parr", "Paula", "Pedra",
+        "Ralph", "Rebecca", "Rudolph", "Selene", "Trishy", "Vera", "Ao Deng",
+        "Ao Yue"
+    ],
+    doc: [
+        "Allison", "Angelina", "Arwin", "Benjamin", "Blackwell", "Boudica",
+        "Catherine", "Chiyoko", "Claudia", "Daisy", "Elia", "Gruen", "Issac",
+        "Lilith", "Lomax", "Luvia", "Maxwell", "Meniere", "Morgana", "Mycelia",
+        "Naga", "Pythia", "Rila", "Rogers", "Rosamond", "Suad", "Tumnus",
+        "Viper", "Viola", "Webster", "Wendy"
+    ]
+};
+
+// Mặc định trạng thái tướng
+function defaultHeroData(name) {
+    return { 
+        name: name,
+        sao: 0,
+        bac: 0,
+        the: 0
+    };
+}
+
+    function openAddHeroDialog() {
+    const systemKey = state.activeSystem.toLowerCase();
+    const options = heroes[systemKey] || [];
+    const name = prompt("Chọn tướng từ danh sách:\n" + options.join(", "));
+    if (!name) return;
+    if (!options.includes(name)) {
+        alert("Tướng không hợp lệ. Chọn từ danh sách.");
+        return;
+    }
+
+    const star = parseInt(prompt("Sao hiện tại (0..5):", "0"), 10) || 0;
+    const bar = parseInt(prompt("Bậc hiện tại (1..n):", "1"), 10) || 1;
+    const cards = parseInt(prompt("Số thẻ hiện có (số nguyên):", "0"), 10) || 0;
+
+    const hero = {
+        id: idNow(),
+        name: name.trim(),
+        system: state.activeSystem,
+        current_star: Math.max(0, Math.min(5, star)),
+        current_bar: Math.max(1, bar),
+        cards_owned: Math.max(0, cards),
+    };
+
+    state.heroes.push(hero);
+    saveState();
+    renderHeroList();
+    renderSummary();
+}
+
 
     let state = {
       heroes: [],
