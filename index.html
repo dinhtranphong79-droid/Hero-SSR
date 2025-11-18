@@ -10,8 +10,6 @@
   --card:#f8f8f8;
   --muted:#555555;
   --accent:#60a5fa;
-
-  /* màu hệ */
   --fire:#e11d48;
   --water:#0284c7;
   --wind:#10b981;
@@ -115,18 +113,24 @@ const CARD_POINT = 14000;
 const SYSTEMS = ["Lửa","Cung","Độc","Băng"];
 const EXP_CATS = {"B+":100,"B":700,"SR":3500};
 
+/* --- Dữ liệu tướng --- */
 const heroesData = {
   "Lửa": ["Dolvar","Paul","Alex","Allen","Anko","Apollo","Blaise","Brie","Catrina","Christie","Cosette","Dain","Darcy","Daria","Dean","Edmund","Erika","Fiona","Gisele","Gro","Ivy","Kenshiro","Kirona","Kyle","Lovelace","Mirai","Penny","Seraphin","Simon","Sindra","Theodore","Tracy","Vanessa","Wallis"],
   "Cung": ["Aidan","Alden","Ariza","Authur","Bella","Colin","Doris","Dylan","Eleanora","Fatima","Gabriel","Green","Jennifer","Johannes","Kadir","Kailin","Layla","Livia","Maya","Meg","Mira","Montag","O'Neil","Padme","Pan","Ptolemy","Richard","Ryan","Sahar","Sebastian","Seraphia","Solder","Torvi","Trist"],
   "Độc": ["Allison","Angelina","Arwin","Benjamin","Blackwell","Boudica","Catherine","Chiyoko","Claudia","Daisy","Elia","Gruen","Issac","Lilith","Lomax","Luvia","Maxwell","Meniere","Morgana","Mycelia","Naga","Pythia","Rila","Rogers","Rosamond","Suad","Tumnus","Viper","Viola","Webster","Wendy"],
   "Băng": ["Christine","Clarence","Enzo","Eslaine","Filius","Hadi","Hana","Hathes","Havik","Jessica","Judy","Keith","Lilani","Loka","Maud","Nathaniel","Nicole","Nina","Nivea","Olaf","Parr","Paula","Pedra","Ralph","Rebecca","Rudolph","Selene","Trishy","Vera","Ao Deng","Ao Yue"]
 };
-const expList = { "B+": [], "B": [], "SR": [] };
+const expList = { 
+  "B+": ["Daniel"],
+  "B": ["Anton","Peter","Etley"],
+  "SR": ["Alucard","Samar","Harold","Kris","Merlin","Ophelia","Arwyn"]
+};
 
 const LS_KEY = "hero_upgrader_state_v2";
 const $ = id => document.getElementById(id);
 let state = { heroes: [], activeTab: SYSTEMS[0] };
 
+/* --- Hàm cơ bản --- */
 function idNow(){ return "h-" + Math.random().toString(36).slice(2,9); }
 function formatNumber(n){ return Number(n).toLocaleString("vi-VN"); }
 function maxBarForStar(st){ const arr=COST_ARRAY[st]||[]; return arr.length; }
@@ -165,7 +169,6 @@ function calculateUpgrade(hero){
   return {isExp:false, final_star:star, final_bar:bar, cards_consumed:consumed, cards_left:cards_left, missing_to_5:ms};
 }
 
-/* Modal */
 function showModal(title,msg,system){
   const modal=$("resultModal"), header=$("modalHeader"), body=$("modalBody"), box=$("modalBox");
   box.className="modal-content sys-"+system;
@@ -199,7 +202,7 @@ Thiếu để 5★: ${res.missing_to_5===Infinity?'Không xác định':res.miss
   showModal(`${hero.name} – Kết quả`, msg, hero.system);
 }
 
-/* Render */
+/* --- Render --- */
 function createHeroElement(h){
   const box=document.createElement("div"); box.className="hero";
   const nameCol=document.createElement("div"); nameCol.innerHTML=`<div style="font-weight:600">${h.name}</div><small>${h.system}</small>`;
@@ -251,31 +254,29 @@ function renderSummary(){
     }
   });
   for(const k in totals){ const row=document.createElement("div"); row.className="row"; row.innerHTML=`<div style="font-weight:600">${k}</div><div class="big">${formatNumber(totals[k])}</div>`; box.appendChild(row);}
-  const totalAll=Object.values(totals).reduce((a,b)=>a+b,0); const tr=document.createElement("div"); tr.className="row"; tr.style.marginTop="8px"; tr.innerHTML=`<strong>Tổng</strong><strong>${formatNumber(totalAll)}</strong>`; box.appendChild(tr);
+  const totalAll=Object.values(totals).reduce((a,b)=>a+b,0);
+  const row=document.createElement("div"); row.className="row big"; row.innerHTML=`<div>Tổng điểm</div><div>${formatNumber(totalAll)}</div>`; box.appendChild(row);
 }
 
 function renderTabs(){
   const tabs=$("tabs"); tabs.innerHTML="";
-  SYSTEMS.concat(Object.keys(expList)).forEach(t=>{
-    const b=document.createElement("button"); b.className="tab"+(state.activeTab===t?" active":""); b.textContent=t;
-    b.onclick=()=>{state.activeTab=t; saveState(); renderTabs(); renderHeroList();}
-    tabs.appendChild(b);
+  SYSTEMS.concat(Object.keys(expList)).forEach(s=>{
+    const t=document.createElement("div"); t.className="tab"+(state.activeTab===s?" active":""); t.textContent=s; t.onclick=()=>{state.activeTab=s; saveState(); renderTabs(); renderHeroList(); $("systemTitle").innerText=s;};
+    tabs.appendChild(t);
   });
 }
 
-/* LocalStorage */
 function saveState(){ localStorage.setItem(LS_KEY,JSON.stringify(state)); }
 function loadState(){
-  const s=localStorage.getItem(LS_KEY); 
-  if(s){ try{ state=JSON.parse(s); }catch(e){} }
-  // khởi tạo heroes nếu trống
-  SYSTEMS.forEach(sys=>heroesData[sys].forEach(n=>{ if(!state.heroes.find(h=>h.name===n)) state.heroes.push(defaultHeroData(n,sys)); }));
-  for(const cat in expList) expList[cat].forEach(n=>{ if(!state.heroes.find(h=>h.name===n)) state.heroes.push(defaultHeroData(n,"Exp")); });
+  const st=localStorage.getItem(LS_KEY);
+  if(st){ state=JSON.parse(st); } 
+  SYSTEMS.concat(Object.keys(expList)).forEach(s=>{ (heroesData[s]||[]).forEach(n=>{ if(!state.heroes.find(h=>h.name===n)) state.heroes.push(defaultHeroData(n,s)); }); });
+  Object.keys(expList).forEach(cat=>expList[cat].forEach(n=>{ if(!state.heroes.find(h=>h.name===n)) state.heroes.push(defaultHeroData(n,"Exp")); }));
 }
 
-$("filterHero").oninput=()=>renderHeroList();
-$("btnCalcAll").onclick=()=>renderSummary();
-
+/* --- Init --- */
+$("filterHero").addEventListener("input",renderHeroList);
+$("btnCalcAll").addEventListener("click",()=>{ state.heroes.forEach(h=>calculateUpgrade(h)); renderSummary(); });
 loadState(); renderTabs(); renderHeroList(); renderSummary();
 </script>
 </body>
