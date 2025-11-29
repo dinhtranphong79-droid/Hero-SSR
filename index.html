@@ -248,12 +248,38 @@ function renderHeroList(){
 function renderSummary(){
   const box=$("summary"); box.innerHTML="";
   const totals={}; SYSTEMS.concat(Object.keys(expList)).forEach(s=>totals[s]=0);
+
   state.heroes.forEach(h=>{
     let pts=0;
-    if(h.system==="Exp"){ for(const cat in expList) if(expList[cat].includes(h.name)){ pts=(h.cards_owned||0)*EXP_CATS[cat]; totals[cat]+=pts; break;} }
-    else { const r=calculateUpgrade(h); let pCount=r.cards_consumed; if(r.final_star>=5) pCount+=r.cards_left; pts=pCount*CARD_POINT; totals[h.system]+=pts; }
+    if(h.system==="Exp"){ 
+      for(const cat in expList) if(expList[cat].includes(h.name)){ pts=(h.cards_owned||0)*EXP_CATS[cat]; totals[cat]+=pts; break;} 
+    }
+    else { 
+      const r=calculateUpgrade(h); 
+      let pCount=r.cards_consumed; 
+      if(r.final_star>=5) pCount+=r.cards_left; 
+      pts=pCount*CARD_POINT; 
+      totals[h.system]+=pts; 
+    }
   });
-  for(const s in totals){ const r=document.createElement("div"); r.className="row"; r.innerHTML=`<span>${s}</span><span class="big">${formatNumber(totals[s])}</span>`; box.appendChild(r);}
+
+  let grandTotal = 0;
+
+  for(const s in totals){ 
+    const r=document.createElement("div"); 
+    r.className="row"; 
+    r.innerHTML=`<span>${s}</span><span class="big">${formatNumber(totals[s])}</span>`; 
+    box.appendChild(r);
+    grandTotal += totals[s];
+  }
+
+  // Dòng tổng điểm
+  const totalRow = document.createElement("div");
+  totalRow.className = "row";
+  totalRow.style.borderTop = "1px solid #ccc";
+  totalRow.style.fontWeight = "700";
+  totalRow.innerHTML = `<span>Tổng điểm</span><span class="big">${formatNumber(grandTotal)}</span>`;
+  box.appendChild(totalRow);
 }
 
 function renderTabs(){
